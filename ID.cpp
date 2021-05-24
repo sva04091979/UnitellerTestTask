@@ -1,23 +1,32 @@
 #include "ID.h"
+#include <algorithm>
 
 bool ID::Set(string&& val) {
-	auto length = val.length();
-	if (length > 29 || (length + 1) % 3 != 0) return false;
-	auto it = val.begin();
-	int i = 0;
-	_ID id;
-	while (it != val.end()) {
-		if (!Add(id,it,i++)) return false;
-		++it;
-	}
-	cId = id;
+	lock_guard<mutex> lock(cLock);
+	if (!Check(val)) return false;
+	cVal = val;
+	return true;
 }
 
-bool ID::Add(_ID& id,string::iterator& it, int i) {
-	char big = static_cast<char>(toupper(static_cast<unsigned char>(*it)));
-	char small = *(++it);
-	if (big < 'A' || big>'Z' || small < '1' || small > '9') return false;
-	switch (big) {
+bool ID::Check(string& id) {
+	auto length = id.length();
+	if (length > 29 || (length + 1) % 3 != 0) return false;
+	auto it = id.begin();
+	while (true) {
+		*it = static_cast<char>(toupper(static_cast<unsigned char>(*it)));
+		if (*it < 'A' || *it>'Z') return false;
+		if (!CheckAlloed(*it)) return false;
+		++it;
+		if (*it < '1' || *it > '9') return false;
+		if (++it == id.end()) break;
+		if (*it != '-') return false;
+		++it;
+	}
+	return true;
+}
+
+bool ID::CheckAlloed(char cell) {
+	switch (cell) {
 	case 'D':
 	case 'F':
 	case 'G':
@@ -27,29 +36,83 @@ bool ID::Add(_ID& id,string::iterator& it, int i) {
 	case 'V':
 		return false;
 	}
-	id[i].Set(big, small);
 	return true;
 }
 
-string&& ID::operator ++() {
+string ID::operator ++() {
+	lock_guard<mutex> lock(cLock);
 	Increase();
-	_ID ret = cId;
-	return ret.Text();
+	return cVal;
 }
 
 string&& ID::operator ++(int) {
-	_ID ret = cId;
+	lock_guard<mutex> lock(cLock);
+	string ret = cVal;
 	Increase();
-	return ret.Text();
+	return move(ret);
 }
 
-
-
-ID::_ID::Cell& ID::_ID::operator[](int i) {
-	return cId[i];
+string ID::operator --() {
+	lock_guard<mutex> lock(cLock);
+	Decrease();
+	return cVal;
 }
 
-void ID::_ID::Cell::Set(char big, char small) {
-	cId[0] = big;
-	cId[1] = small;
+string&& ID::operator --(int) {
+	lock_guard<mutex> lock(cLock);
+	string ret = cVal;
+	Decrease();
+	return move(ret);
+}
+
+void ID::Increase() {
+	if (cVal.empty()||cVal==MAX_INDEX) cVal = "A1";
+	else {
+		auto it = cVal.rbegin();
+		while (true) {
+			++(*it);
+			if (*it > '9') {
+				*it = '1';
+				if (++(*(++it)) > 'Z') {
+					*it = 'A';
+					if (++it == cVal.rend()) {
+						cVal = "A1-" + cVal;
+						break;
+					}
+					else ++it;
+				}
+				else {
+					if (!CheckAlloed(*it)) ++(*it);
+					break;
+				}
+			}
+			else break;
+		}
+	}
+}
+
+void ID::Decrease() {
+	if (cVal.empty() || cVal == "A1") cVal = MAX_INDEX;
+	else {
+		auto it = cVal.rbegin();
+		while (true) {
+			--(*it);
+			if (*it < '1') {
+				*it = '9';
+				if (--(*(++it)) < 'A') {
+					*it = 'Z';
+					if (++it == cVal.rend()) {
+						cVal = cVal.substr(3);
+						break;
+					}
+					else ++it;
+				}
+				else {
+					if (!CheckAlloed(*it)) --(*it);
+					break;
+				}
+			}
+			else break;
+		}
+	}
 }
