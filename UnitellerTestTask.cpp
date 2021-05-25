@@ -23,4 +23,3 @@ int main()
 		cout << --id << endl;
 	}
 }
-
