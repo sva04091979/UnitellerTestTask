@@ -10,13 +10,14 @@ constexpr auto MAX_INDEX = "Z9-Z9-Z9-Z9-Z9-Z9-Z9-Z9-Z9-Z9";
 class ID
 {
 	string cVal;
-	mutex cLock;
+	mutable mutex cLock;
 public:
-	bool Set(string&&);
+	bool Set(string);
 	string operator ++();
-	string&& operator ++(int);
+	string operator ++(int);
 	string operator --();
-	string&& operator --(int);
+	string operator --(int);
+	string operator *() const;
 private:
 	bool Check(string&);
 	bool CheckAlloed(char);

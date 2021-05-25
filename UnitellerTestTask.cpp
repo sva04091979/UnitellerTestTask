@@ -4,14 +4,23 @@
 int main()
 {
 	ID id;
-	cout<<id.Set("Z9-Z9-Z9-Z9-Z9-Z9-Z9-z9-Z9-Z8")<<endl;
-	cout<<++id<<endl;
-	int i = 0;
-	while(i++<10) {
-		string it = ++id;
-		cout << it << endl;
-		if (it == MAX_INDEX) break;
-	}
+	if (!id.Set("M2") && !id.Set("A0") && !id.Set("A1_B2"))
+		cout << "Wrong format check ok" << endl;
+	const string xxx = "Z9-Z9-Z9-Z9-z9-Z9-Z9-Z9-Z9-Z8";
+	id.Set(xxx);
+	cout<<*id<<endl;
+	for (int i = 0; i < 10; ++i)
+		cout << ++id << endl;
+	cout << id++ << endl;
+	cout << *id << endl;
+	const char* yyy = "Z9-Z9";
+	id.Set(yyy);
+	cout << *id << endl;
 	cout << ++id << endl;
+	id.Set("A1");
+	cout << *id << endl;
+	for (int i = 0; i < 10; ++i) {
+		cout << --id << endl;
+	}
 }
 

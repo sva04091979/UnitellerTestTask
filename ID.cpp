@@ -1,7 +1,7 @@
 #include "ID.h"
 #include <algorithm>
 
-bool ID::Set(string&& val) {
+bool ID::Set(string val) {
 	lock_guard<mutex> lock(cLock);
 	if (!Check(val)) return false;
 	cVal = val;
@@ -45,11 +45,11 @@ string ID::operator ++() {
 	return cVal;
 }
 
-string&& ID::operator ++(int) {
+string ID::operator ++(int) {
 	lock_guard<mutex> lock(cLock);
 	string ret = cVal;
 	Increase();
-	return move(ret);
+	return ret;
 }
 
 string ID::operator --() {
@@ -58,11 +58,11 @@ string ID::operator --() {
 	return cVal;
 }
 
-string&& ID::operator --(int) {
+string ID::operator --(int) {
 	lock_guard<mutex> lock(cLock);
 	string ret = cVal;
 	Decrease();
-	return move(ret);
+	return ret;
 }
 
 void ID::Increase() {
@@ -115,4 +115,9 @@ void ID::Decrease() {
 			else break;
 		}
 	}
+}
+
+string ID::operator *() const {
+	lock_guard<mutex> lock(cLock);
+	return cVal;
 }
