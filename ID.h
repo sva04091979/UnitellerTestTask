@@ -18,7 +18,7 @@ class ID
 		friend ID;
 	};
 	string cVal;
-	mutable atomic_flag cLock;
+	mutable atomic_flag cLock=ATOMIC_FLAG_INIT;
 public:
 	bool Set(string);
 	string operator ++();
