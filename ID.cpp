@@ -2,9 +2,9 @@
 #include <algorithm>
 
 bool ID::Set(string val) {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	if (!Check(val)) return false;
-	cVal = val;
+		cVal = val;
 	return true;
 }
 
@@ -40,26 +40,26 @@ bool ID::CheckAlloed(char cell) {
 }
 
 string ID::operator ++() {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	Increase();
 	return cVal;
 }
 
 string ID::operator ++(int) {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	string ret = cVal;
 	Increase();
 	return ret;
 }
 
 string ID::operator --() {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	Decrease();
 	return cVal;
 }
 
 string ID::operator --(int) {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	string ret = cVal;
 	Decrease();
 	return ret;
@@ -118,6 +118,6 @@ void ID::Decrease() {
 }
 
 string ID::operator *() const {
-	lock_guard<mutex> lock(cLock);
+	Locker lock(cLock);
 	return cVal;
 }
